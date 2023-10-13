@@ -1,14 +1,11 @@
 import styled from "styled-components";
-
-interface IHairColor {
-  hairColor: string;
-}
+import { PickColor } from "./utils";
+import { IHairColor } from "./utils/types";
 
 export const Container = styled.div`
   width: 1120px;
   margin: 0 auto;
   padding-top: 169px;
-  //border-bottom: 2px solid grey;
 `;
 
 export const MainContainer = styled.div`
@@ -55,24 +52,22 @@ export const TableHeader = styled.thead`
 `;
 
 export const HairColorIcon = styled.p<IHairColor>`
-  background: ${(props) => {
-    switch (props.hairColor) {
-      case "Chestnut":
-        return "#954535";
-        break;
-      case "Blond":
-        return "#F8D96C";
-        break;
-      case "Auburn":
-        return "#964b00";
-        break;
-      default:
-        return props.hairColor;
-        break;
-    }
-  }};
+  background: ${({ hairColor }) => PickColor(hairColor)};
   border-radius: 100px;
   width: 21px;
   height: 21px;
   flex-shrink: 0;
+`;
+
+export const TableRow = styled.tr`
+  background: #fff;
+  box-shadow: 0px -1px 0px 0px rgba(30, 32, 37, 0.08) inset;
+  width: 1120px;
+  height: 54px;
+  flex-shrink: 0;
+`;
+
+export const TableCell = styled.td`
+  vertical-align: middle;
+  padding-left: 91px;
 `;
