@@ -1,9 +1,24 @@
-import usersData from "../users-data";
 import { TUser } from "../users-data";
-
-interface IUserProps {
-  data: TUser;
-}
+import {
+  Container,
+  HairColorIcon,
+  Header,
+  MainContainer,
+  TableCell,
+  TableContainer,
+  TableHeader,
+  TableRow,
+} from "./Users-homework.styled";
+import {
+  CapitaliseWord,
+  FormatData,
+  FormatPhoneNumber,
+  IsUserValid,
+} from "./utils";
+import { IUserProps } from "./utils/types";
+import { useEffect, useState } from "react";
+import { GETUsers } from "./http-client";
+import { LoadingSpinner, MoveUp, NewUserForm } from "./elements";
 
 // # Users list and form with api
 
@@ -26,23 +41,91 @@ interface IUserProps {
 // 7. Form submit button of the form component should be disabled if form is invalid
 // 8. Show error message for invalid fields
 
-const User = (props: IUserProps) => {
+const User = (props: IUserProps, id: number) => {
   const { data } = props;
+  const handleUp = () => {
+    MoveUp(data.id);
+  };
 
   return (
-    <li>
-      {data.firstName} {data.lastName}
-    </li>
+    IsUserValid(data) && (
+      <TableRow key={id}>
+        <TableCell>
+          <button onClick={handleUp}>MoveUp</button>
+          {data.firstName} {data.lastName}
+        </TableCell>
+        <TableCell>{CapitaliseWord(data.gender)}</TableCell>
+        <TableCell>{<HairColorIcon hairColor={data.hair.color} />}</TableCell>
+        <TableCell>
+          <time dateTime={data.birthDate}>{FormatData(data.birthDate)}</time>
+        </TableCell>
+        <TableCell>{data.phone && FormatPhoneNumber(data.phone)}</TableCell>
+      </TableRow>
+    )
+  );
+};
+
+const TableData = (prop: { data: string }) => {
+  const { data } = prop;
+  return <TableCell>{data}</TableCell>;
+};
+const TableHead = (props: { data: string[] }) => {
+  const { data } = props;
+  return (
+    <TableHeader>
+      <tr>
+        {data.map((element, index) => (
+          <TableData data={element} key={index} />
+        ))}
+      </tr>
+    </TableHeader>
+  );
+};
+
+const TableBody = () => {
+  const [users, setUsers] = useState<TUser[]>([]);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  useEffect(() => {
+    setIsLoaded(false);
+    setTimeout(() => {
+      GETUsers().then((users) => {
+        setUsers(users);
+        setIsLoaded(true);
+      });
+    }, 1000);
+  }, []);
+  return isLoaded ? (
+    <tbody>
+      {users.map((user) => (
+        <User data={user} key={user.id} />
+      ))}
+    </tbody>
+  ) : (
+    <LoadingSpinner />
+  );
+};
+
+const Table = (props: { head: string[] }) => {
+  const { head } = props;
+  return (
+    <TableContainer>
+      {<TableHead data={head} />}
+      {<TableBody />}
+    </TableContainer>
   );
 };
 
 export function Users() {
+  const head: string[] = ["Name", "Gender", "Hair Color", "Birthday", "Phone"];
+
   return (
-    <ul>
-      {usersData.map((user) => (
-        <User data={user} key={user.id} />
-      ))}
-    </ul>
+    <MainContainer>
+      <NewUserForm />
+      <Container>
+        <Header>User</Header>
+        <Table head={head} />
+      </Container>
+    </MainContainer>
   );
 }
 

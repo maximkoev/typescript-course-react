@@ -10,7 +10,8 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "jest",
-    "test-watch": "jest --watch"
+    "test-watch": "jest --watch",
+    "serve:db": "json-server --watch src/lesson14/db/db.json --port 3004"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
