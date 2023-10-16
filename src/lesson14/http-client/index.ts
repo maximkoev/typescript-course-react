@@ -18,7 +18,9 @@ function CRUDUsers(userId?: number, method?: METHOD): Promise<TUser[] | TUser> {
   const httpMethod = method ? method : METHOD.GET;
   const uri = userId ? `${url + resource}/${userId}` : url + resource;
   console.log(`uri: ${uri}`);
-  return fetch(uri, { method: httpMethod }).then((r) => r.json());
+  return fetch(uri, { method: httpMethod }).then((r) => {
+    return r.ok ? r.json() : r.status;
+  });
 }
 
 export function GETUsers(): Promise<TUser[]> {
@@ -31,9 +33,13 @@ export function GETUser(id: number): Promise<TUser> {
 
 export function CreateUser(userPayload: unknown) {
   const body = JSON.stringify(userPayload);
-  return fetch(url + resource, { method: METHOD.POST, body }).then((r) =>
-    r.json(),
-  );
+  return fetch(url + resource, {
+    method: METHOD.POST,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body,
+  }).then((r) => r.json());
 }
 
 export function DeleteUser(userId: number) {
@@ -50,5 +56,11 @@ export function PartialEditUser(user: Partial<TUser>) {
 export function FullEditUser(id: number, user: TUser) {
   const body = JSON.stringify(user);
   const uri = `${url + resource}/${id}`;
-  return fetch(uri, { method: METHOD.PUT, body }).then((r) => r.json());
+  return fetch(uri, {
+    method: METHOD.PUT,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body,
+  }).then((r) => r.json());
 }

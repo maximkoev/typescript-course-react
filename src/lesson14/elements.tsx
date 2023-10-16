@@ -1,31 +1,58 @@
 import { Spinner, SpinnerContainer } from "./Users-homework.styled";
 import { CreateUser, FullEditUser, GETUser } from "./http-client";
-import React, { ChangeEvent } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
+import { IsUserValid } from "./utils";
+import { TUser } from "../users-data";
 
 export function LoadingSpinner() {
   return <SpinnerContainer>{<Spinner />}</SpinnerContainer>;
 }
 
-export async function MoveUp(userID: number) {
-  const currentUser = await GETUser(userID);
-  const prevUser = await GETUser(userID - 1);
+enum SearchDirection {
+  UP = "up",
+  DOWN = "down",
+}
 
-  await FullEditUser(currentUser.id, { ...prevUser, id: currentUser.id });
-  await FullEditUser(prevUser.id, { ...currentUser, id: prevUser.id });
+async function FindValidUser(
+  id: number,
+  direction: SearchDirection,
+): Promise<TUser | null> {
+  const i = direction === SearchDirection.UP ? id - 1 : id + 1;
+  console.log(`i: ${i}`);
+  const user = await GETUser(i);
+  if (typeof user === "number") {
+    return null;
+  }
+  const isValid = IsUserValid(user);
+  if (isValid) {
+    return user;
+  }
+  return await FindValidUser(i, direction);
+}
 
-  // if (currentUser.id === undefined) {
-  //   throw new Error("Returned user in invalid");
-  // }
-  // await CreateUser({ ...currentUser, id: currentUser.id - 1 });
-  // if (prevUser.id === undefined) {
-  //   throw new Error("Returned user in invalid");
-  // }
-  // await CreateUser({ ...prevUser, id: prevUser.id + 1 });
+async function move(id: number, direction: SearchDirection) {
+  const currentUser = await GETUser(id);
+  const changeUser = await FindValidUser(id, direction);
+  if (!changeUser) {
+    const text = direction === SearchDirection.UP ? "top" : "bottom";
+    alert(`User already on the ${text}`);
+    return;
+  }
+  await FullEditUser(changeUser.id, { ...currentUser, id: changeUser.id });
+  return FullEditUser(currentUser.id, { ...changeUser, id: currentUser.id });
+}
+
+export function MoveUp(userId: number) {
+  return move(userId, SearchDirection.UP);
+}
+
+export function MoveDown(userId: number) {
+  return move(userId, SearchDirection.DOWN);
 }
 
 interface IUser {
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   age: number;
   id: number | undefined;
   gender: "male" | "female";
@@ -34,26 +61,34 @@ interface IUser {
   };
   birthDate: string;
   email: string;
+  phone: string;
 }
 
 export function NewUserForm() {
-  const [currentUser, setCurrentUser] = React.useState<IUser>({
+  const [currentUser, setCurrentUser] = useState<IUser>({
     id: undefined,
-    firstname: "",
-    lastname: "",
+    firstName: "",
+    lastName: "",
     age: 30,
     gender: "male",
     hair: {
-      color: "",
+      color: "Blond",
     },
     birthDate: "",
     email: "",
+    phone: "",
   });
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(true);
+  useEffect(() => {
+    if (IsUserValid(currentUser as TUser)) {
+      setIsSubmitDisabled(false);
+    }
+  }, [currentUser]);
+
   const handleFormSubmit = () => {
-    console.log("On submit");
     CreateUser(currentUser);
   };
-  const handleuserAgeChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleUserAgeChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!currentUser) {
       return;
     }
@@ -77,7 +112,21 @@ export function NewUserForm() {
       gender: newUserGender as "male" | "female",
     });
   };
-  const handleFirstnameChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleUserHairColorChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (!currentUser) {
+      return;
+    }
+
+    const newColor = e.target.value;
+
+    setCurrentUser({
+      ...currentUser,
+      hair: {
+        color: newColor,
+      },
+    });
+  };
+  const handleFirstnameChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!currentUser) {
       return;
     }
@@ -86,7 +135,55 @@ export function NewUserForm() {
 
     setCurrentUser({
       ...currentUser,
-      firstname: newUserFirstName,
+      firstName: newUserFirstName,
+    });
+  };
+  const handleLastnameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) {
+      return;
+    }
+
+    const newUserLastName = e.target.value;
+
+    setCurrentUser({
+      ...currentUser,
+      lastName: newUserLastName,
+    });
+  };
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) {
+      return;
+    }
+
+    const newEmail = e.target.value;
+
+    setCurrentUser({
+      ...currentUser,
+      email: newEmail,
+    });
+  };
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) {
+      return;
+    }
+
+    const newPhone = e.target.value;
+
+    setCurrentUser({
+      ...currentUser,
+      phone: newPhone,
+    });
+  };
+  const handleBirthDayChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!currentUser) {
+      return;
+    }
+
+    const newBD = e.target.value;
+
+    setCurrentUser({
+      ...currentUser,
+      birthDate: newBD,
     });
   };
 
@@ -98,10 +195,17 @@ export function NewUserForm() {
             type="number"
             aria-label={"Age"}
             value={currentUser.age}
-            onChange={handleuserAgeChange}
+            onChange={handleUserAgeChange}
           />
           <select value={currentUser.gender} onChange={handleUserGenderChange}>
             {userGenderOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <select onChange={handleUserHairColorChange}>
+            {userHairColorOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -112,14 +216,41 @@ export function NewUserForm() {
             aria-label="firstname"
             onChange={handleFirstnameChange}
           />
-          <button type="submit">Submit</button>
+          <input
+            type="string"
+            aria-label="lastname"
+            onChange={handleLastnameChange}
+          />
+          <input
+            type="string"
+            aria-label="email"
+            onChange={handleEmailChange}
+          />
+          <input
+            id="birthday"
+            type="date"
+            name="birthday-date"
+            onChange={handleBirthDayChange}
+          />
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            pattern="+?[0-9]{3}-[0-9]{2}-[0-9]{3}"
+            onChange={handlePhoneChange}
+          />
+
+          <button type="submit" disabled={isSubmitDisabled}>
+            Submit
+          </button>
         </form>
       )}
     </div>
   );
 }
 
-const userGenderOptions = [
+type TSelectOptions = { label: string; value: string };
+const userGenderOptions: TSelectOptions[] = [
   {
     label: "Male",
     value: "male",
@@ -127,5 +258,27 @@ const userGenderOptions = [
   {
     label: "Female",
     value: "female",
+  },
+];
+const userHairColorOptions: TSelectOptions[] = [
+  {
+    label: "Blond",
+    value: "blond",
+  },
+  {
+    label: "Black",
+    value: "black",
+  },
+  {
+    label: "Brown",
+    value: "brown",
+  },
+  {
+    label: "Auburn",
+    value: "auburn",
+  },
+  {
+    label: "Chestnut",
+    value: "chestnut",
   },
 ];

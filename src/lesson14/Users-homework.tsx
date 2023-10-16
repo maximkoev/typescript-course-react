@@ -18,7 +18,7 @@ import {
 import { IUserProps } from "./utils/types";
 import { useEffect, useState } from "react";
 import { GETUsers } from "./http-client";
-import { LoadingSpinner, MoveUp, NewUserForm } from "./elements";
+import { LoadingSpinner, MoveDown, MoveUp, NewUserForm } from "./elements";
 
 // # Users list and form with api
 
@@ -40,18 +40,26 @@ import { LoadingSpinner, MoveUp, NewUserForm } from "./elements";
 //    4. User birthDate is required and should be valid date
 // 7. Form submit button of the form component should be disabled if form is invalid
 // 8. Show error message for invalid fields
-
 const User = (props: IUserProps, id: number) => {
-  const { data } = props;
+  const [data, setData] = useState<TUser>(props.data);
+  const { onMove } = props;
   const handleUp = () => {
-    MoveUp(data.id);
+    MoveUp(data.id).then(setData);
+    onMove();
+  };
+  const handleDown = () => {
+    MoveDown(data.id).then((data) => {
+      setData(data);
+      onMove();
+    });
   };
 
   return (
     IsUserValid(data) && (
       <TableRow key={id}>
         <TableCell>
-          <button onClick={handleUp}>MoveUp</button>
+          <button onClick={handleUp}>Up</button>
+          <button onClick={handleDown}>Down</button>
           {data.firstName} {data.lastName}
         </TableCell>
         <TableCell>{CapitaliseWord(data.gender)}</TableCell>
@@ -85,7 +93,7 @@ const TableHead = (props: { data: string[] }) => {
 const TableBody = () => {
   const [users, setUsers] = useState<TUser[]>([]);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  useEffect(() => {
+  const fetchUsers = () => {
     setIsLoaded(false);
     setTimeout(() => {
       GETUsers().then((users) => {
@@ -93,11 +101,14 @@ const TableBody = () => {
         setIsLoaded(true);
       });
     }, 1000);
+  };
+  useEffect(() => {
+    fetchUsers();
   }, []);
   return isLoaded ? (
     <tbody>
       {users.map((user) => (
-        <User data={user} key={user.id} />
+        <User data={user} key={user.id} onMove={fetchUsers} />
       ))}
     </tbody>
   ) : (

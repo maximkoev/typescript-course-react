@@ -23,7 +23,7 @@ function CapitaliseWord(word: string): string {
 function FormatData(date: string): string {
   const oldDate = new Date(date);
   const month = oldDate.getMonth();
-  const day = oldDate.getDay() + 1;
+  const day = oldDate.getDate();
   const year = oldDate.getFullYear();
   return `${day} ${monthDictionary[month]}, ${year}`;
 }
@@ -36,10 +36,9 @@ function PickColor(color: string): string {
   return color in colorDic ? colorDic[color] : color;
 }
 
-export function IsUserValid(user: TUser): boolean {
+export function IsUserValid(user: Partial<TUser>): boolean {
   return !!(
     user &&
-    user.id &&
     user.birthDate &&
     user.firstName &&
     user.birthDate &&

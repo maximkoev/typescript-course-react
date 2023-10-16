@@ -9,4 +9,5 @@ export type TColorDictionary = { [key: string]: THex };
 
 export interface IUserProps {
   data: TUser;
+  onMove: () => void;
 }
