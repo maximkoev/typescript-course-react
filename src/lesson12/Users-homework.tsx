@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import usersData from "../users-data";
 import { TUser } from "../users-data";
 
@@ -109,5 +109,3 @@ export function Users() {
     </ul>
   );
 }
-
-export default Users;
