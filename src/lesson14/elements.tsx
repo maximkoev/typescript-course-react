@@ -1,4 +1,8 @@
-import { Spinner, SpinnerContainer } from "./Users-homework.styled";
+import {
+  Spinner,
+  SpinnerContainer,
+  StyledInput,
+} from "./Users-homework.styled";
 import { CreateUser, FullEditUser, GETUser } from "./http-client";
 import { ChangeEvent, useEffect, useState } from "react";
 import { IsUserValid } from "./utils";
@@ -65,6 +69,7 @@ interface IUser {
 }
 
 export function NewUserForm() {
+  const [isFemale, setIsFemale] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<IUser>({
     id: undefined,
     firstName: "",
@@ -74,7 +79,7 @@ export function NewUserForm() {
     hair: {
       color: "Blond",
     },
-    birthDate: "",
+    birthDate: "2017-06-01",
     email: "",
     phone: "",
   });
@@ -100,18 +105,17 @@ export function NewUserForm() {
       age: Number(newUserAge),
     });
   };
-  const handleUserGenderChange = (e: ChangeEvent<HTMLSelectElement>) => {
+  const handleUserGenderChange = () => {
     if (!currentUser) {
       return;
     }
-
-    const newUserGender = e.target.value;
-
+    const newUserGender = isFemale ? "female" : "male";
     setCurrentUser({
       ...currentUser,
-      gender: newUserGender as "male" | "female",
+      gender: newUserGender,
     });
   };
+  useEffect(handleUserGenderChange, [isFemale]);
   const handleUserHairColorChange = (e: ChangeEvent<HTMLSelectElement>) => {
     if (!currentUser) {
       return;
@@ -191,19 +195,22 @@ export function NewUserForm() {
     <div>
       {currentUser && (
         <form onSubmit={handleFormSubmit}>
+          <label htmlFor="age">Age:</label>
           <input
             type="number"
-            aria-label={"Age"}
+            name="age"
+            aria-label="age"
             value={currentUser.age}
             onChange={handleUserAgeChange}
           />
-          <select value={currentUser.gender} onChange={handleUserGenderChange}>
-            {userGenderOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="gender">Is Female?</label>
+          <input
+            name="gender"
+            id="gender"
+            type="checkbox"
+            checked={isFemale}
+            onChange={() => setIsFemale(!isFemale)}
+          />
           <select onChange={handleUserHairColorChange}>
             {userHairColorOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -221,22 +228,27 @@ export function NewUserForm() {
             aria-label="lastname"
             onChange={handleLastnameChange}
           />
-          <input
-            type="string"
+          <label htmlFor="email">Email</label>
+          <StyledInput
+            type="email"
+            name="email"
             aria-label="email"
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
             onChange={handleEmailChange}
           />
           <input
             id="birthday"
             type="date"
             name="birthday-date"
+            value={currentUser.birthDate}
             onChange={handleBirthDayChange}
           />
-          <input
+          <label htmlFor="phone">Phone number:</label>
+          <StyledInput
             type="tel"
             id="phone"
             name="phone"
-            pattern="+?[0-9]{3}-[0-9]{2}-[0-9]{3}"
+            pattern="+[0-9]{2} [0-9]{3} [0-9]{4}"
             onChange={handlePhoneChange}
           />
 

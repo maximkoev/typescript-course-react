@@ -114,3 +114,22 @@ export const SpinnerContainer = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+export const StyledInput = styled.input`
+  :invalid {
+    background-color: #ffdddd;
+  }
+
+  :required {
+    border-color: #800000;
+    border-width: 3px;
+  }
+
+  :required:invalid {
+    border-color: #c00000;
+  }
+
+  :valid {
+    background-color: #3b3b3b;
+  }
+`;

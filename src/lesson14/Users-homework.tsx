@@ -50,7 +50,7 @@ const User = (props: IUserProps, id: number) => {
   const handleDown = () => {
     MoveDown(data.id).then((data) => {
       setData(data);
-      onMove();
+      //onMove();
     });
   };
 
