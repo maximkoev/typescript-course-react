@@ -3,7 +3,7 @@ import {
   SpinnerContainer,
   StyledInput,
 } from "./Users-homework.styled";
-import { CreateUser, FullEditUser, GETUser } from "./http-client";
+import { CreateUser, GETUser, PatchUser } from "./http-client";
 import { ChangeEvent, useEffect, useState } from "react";
 import { IsUserValid } from "./utils";
 import { TUser } from "../users-data";
@@ -42,8 +42,8 @@ async function move(id: number, direction: SearchDirection) {
     alert(`User already on the ${text}`);
     return;
   }
-  await FullEditUser(changeUser.id, { ...currentUser, id: changeUser.id });
-  return FullEditUser(currentUser.id, { ...changeUser, id: currentUser.id });
+  await PatchUser(currentUser.id, { position: changeUser.position });
+  await PatchUser(changeUser.id, { position: currentUser.position });
 }
 
 export function MoveUp(userId: number) {
@@ -262,16 +262,6 @@ export function NewUserForm() {
 }
 
 type TSelectOptions = { label: string; value: string };
-const userGenderOptions: TSelectOptions[] = [
-  {
-    label: "Male",
-    value: "male",
-  },
-  {
-    label: "Female",
-    value: "female",
-  },
-];
 const userHairColorOptions: TSelectOptions[] = [
   {
     label: "Blond",

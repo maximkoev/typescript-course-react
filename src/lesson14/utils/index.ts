@@ -36,7 +36,7 @@ function PickColor(color: string): string {
   return color in colorDic ? colorDic[color] : color;
 }
 
-export function IsUserValid(user: Partial<TUser>): boolean {
+function IsUserValid(user: Partial<TUser>): boolean {
   return !!(
     user &&
     user.birthDate &&
@@ -48,4 +48,26 @@ export function IsUserValid(user: Partial<TUser>): boolean {
   );
 }
 
-export { FormatPhoneNumber, CapitaliseWord, FormatData, PickColor };
+function CleanUsers(users: TUser[]): TUser[] {
+  users.forEach((user, index) => {
+    if (IsUserValid(user)) {
+      return;
+    }
+    users.splice(index, 1);
+  });
+  return users;
+}
+
+function SortUsers(users: TUser[]): TUser[] {
+  CleanUsers(users);
+  return users.sort((a, b) => a.position - b.position);
+}
+
+export {
+  FormatPhoneNumber,
+  CapitaliseWord,
+  FormatData,
+  PickColor,
+  IsUserValid,
+  SortUsers,
+};

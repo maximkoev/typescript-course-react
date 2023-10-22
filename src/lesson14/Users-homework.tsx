@@ -14,6 +14,7 @@ import {
   FormatData,
   FormatPhoneNumber,
   IsUserValid,
+  SortUsers,
 } from "./utils";
 import { IUserProps } from "./utils/types";
 import { useEffect, useState } from "react";
@@ -41,17 +42,15 @@ import { LoadingSpinner, MoveDown, MoveUp, NewUserForm } from "./elements";
 // 7. Form submit button of the form component should be disabled if form is invalid
 // 8. Show error message for invalid fields
 const User = (props: IUserProps, id: number) => {
-  const [data, setData] = useState<TUser>(props.data);
+  const { data } = props;
   const { onMove } = props;
   const handleUp = () => {
-    MoveUp(data.id).then(setData);
+    MoveUp(data.id);
     onMove();
   };
   const handleDown = () => {
-    MoveDown(data.id).then((data) => {
-      setData(data);
-      //onMove();
-    });
+    MoveDown(data.id);
+    onMove();
   };
 
   return (
@@ -97,6 +96,7 @@ const TableBody = () => {
     setIsLoaded(false);
     setTimeout(() => {
       GETUsers().then((users) => {
+        users = SortUsers(users);
         setUsers(users);
         setIsLoaded(true);
       });

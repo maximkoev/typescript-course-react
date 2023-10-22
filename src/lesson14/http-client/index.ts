@@ -46,11 +46,16 @@ export function DeleteUser(userId: number) {
   return CRUDUsers(userId, METHOD.DELETE);
 }
 
-export function PartialEditUser(user: Partial<TUser>) {
-  if (!user.id) {
-    throw new Error("User id is missing");
-  }
-  return CRUDUsers(user.id, METHOD.PATCH);
+export function PatchUser(id: number, user: Partial<TUser>) {
+  const body = JSON.stringify(user);
+  const uri = `${url + resource}/${id}`;
+  return fetch(uri, {
+    method: METHOD.PATCH,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body,
+  }).then((r) => r.json());
 }
 
 export function FullEditUser(id: number, user: TUser) {
