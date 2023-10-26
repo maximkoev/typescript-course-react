@@ -1,4 +1,4 @@
-import { TodoEditItem, Todo } from "../types";
+import { Todo } from "../types";
 
 export const addTodo = (data: Todo) => {
   return {

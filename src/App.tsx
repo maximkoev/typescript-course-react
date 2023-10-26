@@ -1,10 +1,12 @@
 import "./App.css";
-import { Lesson17Homework } from "./lesson17-homework";
+import DefferredDemo, { UseIDDemo } from "./lesson16/lesson16.hw";
+import { ImperativeDemo } from "./lesson16/imperativeDemo.hw";
+import { Counter } from "./lesson16/reducerDemo.hw";
 
 export function App() {
   return (
     <>
-      <Lesson17Homework />
+      <Counter />
     </>
   );
 }
