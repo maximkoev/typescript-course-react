@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { StateContext, StateProvider } from "./StateContext";
+import React from "react";
+import { StateContext } from "./StateContext";
 
 interface IUserProps {
   data: IUser;
